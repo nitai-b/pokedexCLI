@@ -7,6 +7,19 @@ import (
 )
 
 func main() {
+	commands := map[string]cliCommand{
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "Help and usage of Pokedex",
+			callback:    commandHelp,
+		},
+	}
+
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -16,15 +29,20 @@ func main() {
 			break
 		}
 
-		cmd := cleanInput(scanner.Text())
-		if len(cmd[0]) == 0 {
+		words := cleanInput(scanner.Text())
+		if len(words) == 0 {
 			continue
 		}
-		if cmd[0] == "quit" {
-			break
+
+		command, exists := commands[words[0]]
+		if !exists {
+			fmt.Println("Unknown command")
+			continue
 		}
 
-		fmt.Println("Your command was:", cmd[0])
+		if err := command.callback(); err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
