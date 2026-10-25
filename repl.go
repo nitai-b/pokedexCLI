@@ -19,16 +19,20 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*cmdConfig) error
 }
 
-func commandExit() error {
+type cmdConfig struct {
+	commands map[string]cliCommand
+}
+
+func commandExit(cfg *cmdConfig) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(cfg *cmdConfig) error {
 	fmt.Println(`Welcome to the Pokedex!
 Usage:
 

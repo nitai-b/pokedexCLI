@@ -7,16 +7,18 @@ import (
 )
 
 func main() {
-	commands := map[string]cliCommand{
-		"exit": {
-			name:        "exit",
-			description: "Exit the Pokedex",
-			callback:    commandExit,
-		},
-		"help": {
-			name:        "help",
-			description: "Help and usage of Pokedex",
-			callback:    commandHelp,
+	cfg := cmdConfig{
+		commands: map[string]cliCommand{
+			"exit": {
+				name:        "exit",
+				description: "Exit the Pokedex",
+				callback:    commandExit,
+			},
+			"help": {
+				name:        "help",
+				description: "Help and usage of Pokedex",
+				callback:    commandHelp,
+			},
 		},
 	}
 
@@ -34,13 +36,13 @@ func main() {
 			continue
 		}
 
-		command, exists := commands[words[0]]
+		command, exists := cfg.commands[words[0]]
 		if !exists {
 			fmt.Println("Unknown command")
 			continue
 		}
 
-		if err := command.callback(); err != nil {
+		if err := command.callback(&cfg); err != nil {
 			fmt.Println(err)
 		}
 	}
