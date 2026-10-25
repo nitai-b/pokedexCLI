@@ -17,14 +17,17 @@ func main() {
 		}
 
 		cmd := cleanInput(scanner.Text())
+		if len(cmd[0]) == 0 {
+			continue
+		}
 		if cmd[0] == "quit" {
 			break
 		}
 
-		fmt.Println("Your command was: ", cmd[0])
+		fmt.Println("Your command was:", cmd[0])
 	}
 
 	if err := scanner.Err(); err != nil {
-		fmt.Println("error: ", err)
+		fmt.Println("error:", err)
 	}
 }
