@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	pokeAPI "github.com/nitai-b/pokedexcli/pokeApi"
+	"github.com/nitai-b/pokedexcli/internal/pokeapi"
 )
 
 func cleanInput(text string) []string {
@@ -65,7 +65,7 @@ func commandMap(cfg *cmdConfig) error {
 		}
 	}()
 
-	var mapLocation pokeAPI.LocationResponse
+	var mapLocation pokeapi.LocationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&mapLocation); err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func commandMapBack(cfg *cmdConfig) error {
 		}
 	}()
 
-	var mapLocation pokeAPI.LocationResponse
+	var mapLocation pokeapi.LocationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&mapLocation); err != nil {
 		return err
 	}

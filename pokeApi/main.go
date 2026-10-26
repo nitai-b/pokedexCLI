@@ -1,5 +1,5 @@
-// Package pokeAPI for using PokeAPI
-package pokeAPI
+// Package pokeapi for using PokeAPI
+package pokeapi
 
 type LocationResponse struct {
 	Count    int     `json:"count"`
