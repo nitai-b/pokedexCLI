@@ -19,6 +19,16 @@ func main() {
 				description: "Help and usage of Pokedex",
 				callback:    commandHelp,
 			},
+			"map": {
+				name:        "map",
+				description: "Get list of locations on map",
+				callback:    commandMap,
+			},
+			"mapb": {
+				name:        "mapb",
+				description: "Nav to Previous list of locations on map",
+				callback:    commandMapBack,
+			},
 		},
 	}
 
