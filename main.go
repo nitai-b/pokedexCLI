@@ -33,6 +33,11 @@ func main() {
 				description: "Nav to Previous list of locations on map",
 				callback:    commandMapBack,
 			},
+			"explore": {
+				name:        "explore",
+				description: "Explore a location",
+				callback:    commandExplore,
+			},
 		},
 	}
 
@@ -56,7 +61,7 @@ func main() {
 			continue
 		}
 
-		if err := command.callback(&cfg); err != nil {
+		if err := command.callback(&cfg, words[1:]); err != nil {
 			fmt.Println(err)
 		}
 	}

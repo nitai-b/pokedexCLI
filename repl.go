@@ -25,7 +25,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*cmdConfig) error
+	callback    func(cfg *cmdConfig, arguments []string) error
 }
 
 type cmdConfig struct {
@@ -35,13 +35,13 @@ type cmdConfig struct {
 	cache    *pokecache.Cache
 }
 
-func commandExit(cfg *cmdConfig) error {
+func commandExit(cfg *cmdConfig, args []string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(cfg *cmdConfig) error {
+func commandHelp(cfg *cmdConfig, args []string) error {
 	fmt.Println(`Welcome to the Pokedex!
 Usage:
 
@@ -51,7 +51,7 @@ exit: Exit the Pokedex
 	return nil
 }
 
-func commandMap(cfg *cmdConfig) error {
+func commandMap(cfg *cmdConfig, args []string) error {
 	url := cfg.Next
 	if url == "" {
 		url = "https://pokeapi.co/api/v2/location-area/"
@@ -100,7 +100,7 @@ func commandMap(cfg *cmdConfig) error {
 	return nil
 }
 
-func commandMapBack(cfg *cmdConfig) error {
+func commandMapBack(cfg *cmdConfig, args []string) error {
 	if cfg.Previous == "" {
 		fmt.Println("You're on the first page")
 		return nil
@@ -145,6 +145,53 @@ func commandMapBack(cfg *cmdConfig) error {
 
 	for _, location := range mapLocation.Results {
 		fmt.Println(location.Name)
+	}
+
+	return nil
+}
+
+func commandExplore(cfg *cmdConfig, args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("location name arguments missing")
+	}
+
+	fmt.Printf("\nExploring %s...\n", args[0])
+
+	url := "https://pokeapi.co/api/v2/location-area/" + args[0]
+
+	var locationDetails pokeapi.LocationDetailsResponse
+	data, hasCache := cfg.cache.Get(url)
+
+	if hasCache {
+		if err := json.Unmarshal(data, &locationDetails); err != nil {
+			return err
+		}
+	} else {
+		resp, err := http.Get(url)
+		if err != nil {
+			return err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				fmt.Println("error closing response body: ", err)
+			}
+		}()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		cfg.cache.Add(url, body)
+
+		if err := json.Unmarshal(body, &locationDetails); err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("Found Pokemon:\n")
+	for _, location := range locationDetails.PokemonEncounters {
+		fmt.Printf("\t- %s\n", location.Pokemon.Name)
 	}
 
 	return nil
