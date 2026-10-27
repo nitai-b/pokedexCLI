@@ -4,10 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/nitai-b/pokedexcli/internal/pokecache"
 )
 
 func main() {
 	cfg := cmdConfig{
+		cache: pokecache.NewCache(5 * time.Second),
 		commands: map[string]cliCommand{
 			"exit": {
 				name:        "exit",

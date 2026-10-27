@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/nitai-b/pokedexcli/internal/pokeapi"
+	"github.com/nitai-b/pokedexcli/internal/pokecache"
 )
 
 func cleanInput(text string) []string {
@@ -30,6 +32,7 @@ type cmdConfig struct {
 	commands map[string]cliCommand
 	Next     string
 	Previous string
+	cache    *pokecache.Cache
 }
 
 func commandExit(cfg *cmdConfig) error {
@@ -54,20 +57,34 @@ func commandMap(cfg *cmdConfig) error {
 		url = "https://pokeapi.co/api/v2/location-area/"
 	}
 
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("error closing response body: ", err)
-		}
-	}()
-
 	var mapLocation pokeapi.LocationResponse
-	if err := json.NewDecoder(resp.Body).Decode(&mapLocation); err != nil {
-		return err
+	data, hasCache := cfg.cache.Get(url)
+
+	if hasCache {
+		if err := json.Unmarshal(data, &mapLocation); err != nil {
+			return err
+		}
+	} else {
+		resp, err := http.Get(url)
+		if err != nil {
+			return err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				fmt.Println("error closing response body: ", err)
+			}
+		}()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		cfg.cache.Add(url, body)
+
+		if err := json.Unmarshal(body, &mapLocation); err != nil {
+			return err
+		}
 	}
 
 	cfg.Next = mapLocation.Next
@@ -90,23 +107,38 @@ func commandMapBack(cfg *cmdConfig) error {
 	}
 	url := cfg.Previous
 
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("error closing response body: ", err)
-		}
-	}()
-
 	var mapLocation pokeapi.LocationResponse
-	if err := json.NewDecoder(resp.Body).Decode(&mapLocation); err != nil {
-		return err
+	data, hasCache := cfg.cache.Get(url)
+
+	if hasCache {
+		if err := json.Unmarshal(data, &mapLocation); err != nil {
+			return err
+		}
+	} else {
+		resp, err := http.Get(url)
+		if err != nil {
+			return err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				fmt.Println("error closing response body: ", err)
+			}
+		}()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		cfg.cache.Add(url, body)
+
+		if err := json.Unmarshal(body, &mapLocation); err != nil {
+			return err
+		}
 	}
 
 	cfg.Next = mapLocation.Next
+	cfg.Previous = ""
 	if mapLocation.Previous != nil {
 		cfg.Previous = *mapLocation.Previous
 	}
