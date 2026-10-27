@@ -1,6 +1,15 @@
 // Package pokeapi for using PokeAPI
 package pokeapi
 
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+
+	"github.com/nitai-b/pokedexcli/internal/pokecache"
+)
+
 type LocationResponse struct {
 	Count    int     `json:"count"`
 	Next     string  `json:"next"`
@@ -63,4 +72,70 @@ type LocationDetailsResponse struct {
 			} `json:"encounter_details"`
 		} `json:"version_details"`
 	} `json:"pokemon_encounters"`
+}
+
+func GetLocationData(url string, cache *pokecache.Cache) (LocationResponse, error) {
+	var mapLocation LocationResponse
+	data, hasCache := cache.Get(url)
+
+	if hasCache {
+		if err := json.Unmarshal(data, &mapLocation); err != nil {
+			return mapLocation, err
+		}
+	} else {
+		resp, err := http.Get(url)
+		if err != nil {
+			return mapLocation, err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				fmt.Println("error closing response body: ", err)
+			}
+		}()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return mapLocation, err
+		}
+		cache.Add(url, body)
+
+		if err := json.Unmarshal(body, &mapLocation); err != nil {
+			return mapLocation, err
+		}
+	}
+	return mapLocation, nil
+}
+
+func GetLocationDetails(url string, cache *pokecache.Cache) (LocationDetailsResponse, error) {
+	var locationDetails LocationDetailsResponse
+	data, hasCache := cache.Get(url)
+
+	if hasCache {
+		if err := json.Unmarshal(data, &locationDetails); err != nil {
+			return locationDetails, err
+		}
+	} else {
+		resp, err := http.Get(url)
+		if err != nil {
+			return locationDetails, err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				fmt.Println("error closing response body: ", err)
+			}
+		}()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return locationDetails, err
+		}
+		cache.Add(url, body)
+
+		if err := json.Unmarshal(body, &locationDetails); err != nil {
+			return locationDetails, err
+		}
+	}
+	return locationDetails, nil
 }

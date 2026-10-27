@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"strings"
 
@@ -57,34 +54,9 @@ func commandMap(cfg *cmdConfig, args []string) error {
 		url = "https://pokeapi.co/api/v2/location-area/"
 	}
 
-	var mapLocation pokeapi.LocationResponse
-	data, hasCache := cfg.cache.Get(url)
-
-	if hasCache {
-		if err := json.Unmarshal(data, &mapLocation); err != nil {
-			return err
-		}
-	} else {
-		resp, err := http.Get(url)
-		if err != nil {
-			return err
-		}
-
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				fmt.Println("error closing response body: ", err)
-			}
-		}()
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		cfg.cache.Add(url, body)
-
-		if err := json.Unmarshal(body, &mapLocation); err != nil {
-			return err
-		}
+	mapLocation, err := pokeapi.GetLocationData(url, cfg.cache)
+	if err != nil {
+		return err
 	}
 
 	cfg.Next = mapLocation.Next
@@ -107,34 +79,9 @@ func commandMapBack(cfg *cmdConfig, args []string) error {
 	}
 	url := cfg.Previous
 
-	var mapLocation pokeapi.LocationResponse
-	data, hasCache := cfg.cache.Get(url)
-
-	if hasCache {
-		if err := json.Unmarshal(data, &mapLocation); err != nil {
-			return err
-		}
-	} else {
-		resp, err := http.Get(url)
-		if err != nil {
-			return err
-		}
-
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				fmt.Println("error closing response body: ", err)
-			}
-		}()
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		cfg.cache.Add(url, body)
-
-		if err := json.Unmarshal(body, &mapLocation); err != nil {
-			return err
-		}
+	mapLocation, err := pokeapi.GetLocationData(url, cfg.cache)
+	if err != nil {
+		return err
 	}
 
 	cfg.Next = mapLocation.Next
@@ -159,34 +106,9 @@ func commandExplore(cfg *cmdConfig, args []string) error {
 
 	url := "https://pokeapi.co/api/v2/location-area/" + args[0]
 
-	var locationDetails pokeapi.LocationDetailsResponse
-	data, hasCache := cfg.cache.Get(url)
-
-	if hasCache {
-		if err := json.Unmarshal(data, &locationDetails); err != nil {
-			return err
-		}
-	} else {
-		resp, err := http.Get(url)
-		if err != nil {
-			return err
-		}
-
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				fmt.Println("error closing response body: ", err)
-			}
-		}()
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		cfg.cache.Add(url, body)
-
-		if err := json.Unmarshal(body, &locationDetails); err != nil {
-			return err
-		}
+	locationDetails, err := pokeapi.GetLocationDetails(url, cfg.cache)
+	if err != nil {
+		return err
 	}
 
 	fmt.Printf("Found Pokemon:\n")
