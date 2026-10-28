@@ -111,3 +111,38 @@ func GetLocationDetails(url string, cache *pokecache.Cache) (LocationDetailsResp
 	}
 	return locationDetails, nil
 }
+
+func GetPokemonDetails(pokemonName string, cache *pokecache.Cache) (Pokemon, error) {
+	var pokemon Pokemon
+	url := "https://pokeapi.co/api/v2/pokemon/" + pokemonName
+	data, hasCache := cache.Get(url)
+
+	if hasCache {
+		if err := json.Unmarshal(data, &pokemon); err != nil {
+			return pokemon, err
+		}
+	} else {
+		resp, err := http.Get(url)
+		if err != nil {
+			return pokemon, err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				fmt.Println("error closing response body: ", err)
+			}
+		}()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return pokemon, err
+		}
+		cache.Add(url, body)
+
+		if err := json.Unmarshal(body, &pokemon); err != nil {
+			return pokemon, err
+		}
+	}
+
+	return pokemon, nil
+}
