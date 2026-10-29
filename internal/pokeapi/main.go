@@ -66,6 +66,10 @@ func GetLocationData(url string, cache *pokecache.Cache) (LocationResponse, erro
 			}
 		}()
 
+		if resp.StatusCode == http.StatusNotFound {
+			return mapLocation, fmt.Errorf("no location found")
+		}
+
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return mapLocation, err
@@ -79,8 +83,9 @@ func GetLocationData(url string, cache *pokecache.Cache) (LocationResponse, erro
 	return mapLocation, nil
 }
 
-func GetLocationDetails(url string, cache *pokecache.Cache) (LocationDetailsResponse, error) {
+func GetLocationDetails(areaName string, cache *pokecache.Cache) (LocationDetailsResponse, error) {
 	var locationDetails LocationDetailsResponse
+	url := "https://pokeapi.co/api/v2/location-area/" + areaName
 	data, hasCache := cache.Get(url)
 
 	if hasCache {
@@ -98,6 +103,10 @@ func GetLocationDetails(url string, cache *pokecache.Cache) (LocationDetailsResp
 				fmt.Println("error closing response body: ", err)
 			}
 		}()
+
+		if resp.StatusCode == http.StatusNotFound {
+			return locationDetails, fmt.Errorf("no location with name: %s", areaName)
+		}
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
