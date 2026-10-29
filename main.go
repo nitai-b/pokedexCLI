@@ -32,7 +32,7 @@ func main() {
 			},
 			"mapb": {
 				name:        "mapb",
-				description: "Nav to Previous list of locations on map",
+				description: "Navigate to previous list of locations",
 				callback:    commandMapBack,
 			},
 			"explore": {
@@ -47,12 +47,12 @@ func main() {
 			},
 			"inspect": {
 				name:        "inspect",
-				description: "Inspect Pokemon the User has Caught",
+				description: "Inspect Pokemon you caught",
 				callback:    commandInspect,
 			},
 			"pokedex": {
 				name:        "pokedex",
-				description: "See the pokemon you caught",
+				description: "See the Pokemon you caught",
 				callback:    commandPokedex,
 			},
 		},

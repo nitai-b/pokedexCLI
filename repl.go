@@ -41,12 +41,10 @@ func commandExit(cfg *cmdConfig, args []string) error {
 }
 
 func commandHelp(cfg *cmdConfig, args []string) error {
-	fmt.Println(`Welcome to the Pokedex!
-Usage:
-
-help: Displays a help message
-exit: Exit the Pokedex
-		`)
+	fmt.Printf("Welcome to the Pokedex! \nUsage:\n")
+	for command, value := range cfg.commands {
+		fmt.Printf("\t%s - %s\n", command, value.description)
+	}
 	return nil
 }
 
