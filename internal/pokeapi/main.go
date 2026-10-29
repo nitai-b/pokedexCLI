@@ -133,6 +133,10 @@ func GetPokemonDetails(pokemonName string, cache *pokecache.Cache) (Pokemon, err
 			}
 		}()
 
+		if resp.StatusCode == http.StatusNotFound {
+			return pokemon, fmt.Errorf("'%s' is not a real Pokemon", pokemonName)
+		}
+
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return pokemon, err

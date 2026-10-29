@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"os"
 	"strings"
 
@@ -30,6 +31,7 @@ type cmdConfig struct {
 	Next     string
 	Previous string
 	cache    *pokecache.Cache
+	pokemon  map[string]pokeapi.Pokemon
 }
 
 func commandExit(cfg *cmdConfig, args []string) error {
@@ -114,6 +116,30 @@ func commandExplore(cfg *cmdConfig, args []string) error {
 	fmt.Printf("Found Pokemon:\n")
 	for _, location := range locationDetails.PokemonEncounters {
 		fmt.Printf("\t- %s\n", location.Pokemon.Name)
+	}
+
+	return nil
+}
+
+func commandCatch(cfg *cmdConfig, args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("pokemon name argument missing")
+	}
+	fmt.Printf("Throwing a Pokeball at %s...\n", args[0])
+
+	pokemon, err := pokeapi.GetPokemonDetails(args[0], cfg.cache)
+	if err != nil {
+		return err
+	}
+
+	const catchThreshold = 40
+
+	caught := rand.IntN(pokemon.BaseExperience+1) < catchThreshold
+	if caught {
+		cfg.pokemon[pokemon.Name] = pokemon
+		fmt.Printf("%s was caught!\n", pokemon.Name)
+	} else {
+		fmt.Printf("%s escaped!\n", pokemon.Name)
 	}
 
 	return nil

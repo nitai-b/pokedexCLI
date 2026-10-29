@@ -6,12 +6,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/nitai-b/pokedexcli/internal/pokeapi"
 	"github.com/nitai-b/pokedexcli/internal/pokecache"
 )
 
 func main() {
 	cfg := cmdConfig{
-		cache: pokecache.NewCache(5 * time.Second),
+		cache:   pokecache.NewCache(5 * time.Second),
+		pokemon: map[string]pokeapi.Pokemon{},
 		commands: map[string]cliCommand{
 			"exit": {
 				name:        "exit",
@@ -37,6 +39,11 @@ func main() {
 				name:        "explore",
 				description: "Explore a location",
 				callback:    commandExplore,
+			},
+			"catch": {
+				name:        "catch",
+				description: "Catch a Pokemon",
+				callback:    commandCatch,
 			},
 		},
 	}
