@@ -144,3 +144,28 @@ func commandCatch(cfg *cmdConfig, args []string) error {
 
 	return nil
 }
+
+func commandInspect(cfg *cmdConfig, args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("pokemon name argument is missing")
+	}
+
+	if pokemon, ok := cfg.pokemon[args[0]]; !ok {
+		return fmt.Errorf("you have not caught this pokemon")
+	} else {
+		fmt.Printf("Name: %s\n", pokemon.Name)
+		fmt.Printf("Height: %v\n", pokemon.Height)
+		fmt.Printf("Weight: %v\n", pokemon.Weight)
+		fmt.Printf("Stats:\n")
+		for _, stat := range pokemon.Stats {
+			fmt.Printf("\t- %s: %d\n", stat.Stat.Name, stat.BaseStat)
+		}
+		fmt.Printf("Types:\n")
+		for _, pokeType := range pokemon.Types {
+			fmt.Printf("\t- %s\n", pokeType.Type.Name)
+		}
+
+	}
+
+	return nil
+}
