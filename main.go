@@ -50,6 +50,11 @@ func main() {
 				description: "Inspect Pokemon the User has Caught",
 				callback:    commandInspect,
 			},
+			"pokedex": {
+				name:        "pokedex",
+				description: "See the pokemon you caught",
+				callback:    commandPokedex,
+			},
 		},
 	}
 
